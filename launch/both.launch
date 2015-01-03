@@ -1,0 +1,11 @@
+<launch>
+
+  <arg name="mass" value="0.721" />
+  
+  <include file="$(find tune_corrections)/launch/quad.launch" />
+
+  <include file="$(find tune_corrections)/launch/base.launch">
+    <arg name="mass" value="$(arg mass)" />
+  </include>
+
+</launch>

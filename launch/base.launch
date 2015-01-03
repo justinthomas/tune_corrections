@@ -1,0 +1,51 @@
+<launch>
+
+  <arg name="mass" default="0.5" />
+
+  <node pkg="nodelet"
+   type="nodelet"
+   name="standalone_nodelet"
+   args="manager"
+   output="screen"/>
+
+  <node pkg="nodelet"
+   type="nodelet"
+   name="controllers_manager"
+   args="load controllers_manager/ControllersManager standalone_nodelet"
+   output="screen">
+   <rosparam file="$(find tune_corrections)/config/controllers.yaml"/>
+   <rosparam file="$(find tune_corrections)/config/controller_params.yaml"/>
+   <remap from="~odom" to="odom"/>
+   <remap from="~cmd" to="position_cmd"/>
+  </node>
+
+  <node pkg="nodelet"
+    type="nodelet"
+    name="quad_encode_msg"
+    args="load quad_encode_msg/QuadEncodeMsg standalone_nodelet"
+    output="screen">
+    <remap from="~so3_cmd" to="so3_cmd"/>
+    <remap from="~serial_msg" to="to_robot"/>
+  </node>
+
+  <node pkg="nodelet"
+    type="nodelet"
+    name="quad_decode_msg"
+    args="load quad_decode_msg/QuadDecodeMsg standalone_nodelet"
+    output="screen">
+    <remap from="~serial" to="from_robot"/>
+  </node>
+
+  <!-- This is the state control node -->
+  <node pkg="tune_corrections"
+    type="tune_corrections"
+    name="tune_corrections"
+    output="screen">
+
+    <param name="mass" value="$(arg mass)"/>
+    <rosparam file="$(find tune_corrections)/config/hummingbird_gains.yaml"/>
+
+    <remap from="~so3_cmd" to="so3_cmd"/>
+  </node>
+
+</launch>
